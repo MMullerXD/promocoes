@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Protótipo · Aceite automático de promoções</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--side:#fafafa;--muted:#f3f3f5;--line:#e4e4e7;--fg:#18181b;--fg2:#6b6b76;--primary:#2a1be0;--on:#fff;--pS:#efedfd;--pF:#4a2db8;--sel:#e9f3fb;
+--ok:#15803d;--okS:#e3f6e9;--warn:#a14b07;--warnS:#fdf2d6;--bad:#c42b1c;--badS:#fde4e1;--indS:#e8eefc;--ovl:rgba(20,20,28,.4);color-scheme:light;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141419;--side:#18181e;--muted:#24242c;--line:#33333d;--fg:#ececf1;--fg2:#a2a2ae;--primary:#7d70ff;--on:#100e26;--pS:#27234b;--pF:#bcb2ff;--sel:#1d2a38;--ok:#62d18c;--okS:#183825;--warn:#f2b45d;--warnS:#3b2b13;--bad:#ff8b80;--badS:#3e1d1b;--indS:#1f2742;--ovl:rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141419;--side:#18181e;--muted:#24242c;--line:#33333d;--fg:#ececf1;--fg2:#a2a2ae;--primary:#7d70ff;--on:#100e26;--pS:#27234b;--pF:#bcb2ff;--sel:#1d2a38;--ok:#62d18c;--okS:#183825;--warn:#f2b45d;--warnS:#3b2b13;--bad:#ff8b80;--badS:#3e1d1b;--indS:#1f2742;--ovl:rgba(0,0,0,.6);color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--fg);font:400 14px/1.45 Roboto,"Segoe UI",system-ui,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh}
+.side{background:var(--side);border-right:1px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:6px}
+.brand{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.brand .r{display:flex;gap:8px;align-items:center}
+.logo{width:22px;height:22px}
+.brand small{display:block;font-size:9.5px;color:var(--fg2);letter-spacing:.04em}
+.brand b{font-weight:500}
+.brand .ctx{display:flex;gap:6px;margin-top:8px}.brand .ctx span{flex:1;background:var(--muted);border-radius:7px;padding:4px 8px;font-size:12px;font-weight:500}
+.nh{font-size:11px;font-weight:500;color:var(--fg2);margin:12px 0 4px 10px}
+.ni{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;color:var(--fg);font-size:13.5px;border:0;background:none;text-align:left;width:100%}
+.ni.dim{color:var(--fg);cursor:default}
+.ni.on{background:var(--pS);box-shadow:inset 3px 0 0 var(--primary);font-weight:500}
+.ni svg{width:16px;height:16px;flex:none;color:var(--fg2)}
+.adm{margin-left:auto;font-size:10.5px;font-weight:500;background:var(--pS);color:var(--pF);border-radius:6px;padding:2px 6px}
+.user{margin-top:auto;display:flex;gap:10px;align-items:center;padding:10px;border-top:1px solid var(--line)}
+.user .av{width:28px;height:28px;border-radius:8px;background:var(--indS);color:var(--primary);display:grid;place-items:center;font-weight:500;font-size:12px}
+.user b{font-weight:500;display:block;font-size:13px}.user small{color:var(--fg2);font-size:11.5px}
+main{padding:28px 32px 64px;min-width:0}
+.tabs{display:inline-flex;gap:4px;background:var(--muted);border-radius:10px;padding:4px;margin-bottom:16px}
+.tabs button{border:0;background:transparent;padding:6px 14px;border-radius:7px;font-weight:500;color:var(--fg2)}
+.tabs button[aria-selected="true"]{background:var(--bg);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.crumb{border:0;background:none;padding:0;color:var(--fg2);font-size:13px;margin-bottom:10px}
+h1{margin:0;font-size:22px;font-weight:500;display:flex;align-items:center;gap:8px}
+h1 .hp{width:16px;height:16px;border:1.5px solid var(--fg2);border-radius:50%;display:inline-grid;place-items:center;font-size:10px;color:var(--fg2)}
+.desc{margin:4px 0 20px;color:var(--fg2)}
+.btn{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 16px;font-weight:500;white-space:nowrap}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.pr{background:var(--primary);border-color:var(--primary);color:var(--on)}
+.btn.dg{color:var(--bad);border-color:var(--bad)}
+.btn.sm{padding:6px 12px;font-size:13px}
+.lnk{border:0;background:none;color:var(--primary);font-weight:500;padding:4px 6px}
+.muted{color:var(--fg2)}.sm{font-size:12.5px}
+.row{display:flex;gap:12px;align-items:center}
+.grow{flex:1}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:12px}
+.badge{display:inline-flex;align-items:center;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:500;white-space:nowrap}
+.b-ok{background:var(--okS);color:var(--ok)}.b-pu{background:var(--pS);color:var(--pF)}.b-warn{background:var(--warnS);color:var(--warn)}.b-bad{background:var(--badS);color:var(--bad)}.b-n{background:var(--muted);color:var(--fg2)}.b-solid{background:var(--primary);color:var(--on)}
+/* passo 1 */
+.types{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.type{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:flex;flex-direction:column;gap:12px;padding:24px;border:1px solid var(--line);border-radius:14px;background:var(--bg);min-height:160px}
+.type[aria-checked="true"]{border:2px solid var(--primary);padding:23px}
+.type .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--muted);color:var(--pF)}
+.type[aria-checked="true"] .ic{background:var(--pS);color:var(--primary)}
+.type h3{margin:0;font-size:15px;font-weight:500}.type p{margin:0;color:var(--fg2);font-size:13px;max-width:60ch}
+.type .tag{position:absolute;top:-1px;right:-1px;border-radius:0 12px 0 8px;background:var(--indS);color:var(--primary);font-size:11px;font-weight:500;padding:3px 8px}
+.type:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
+.ft{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+/* form */
+.form{display:flex;flex-direction:column;gap:16px}
+.step{padding:20px 24px}
+.sh{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px}
+.num{width:22px;height:22px;border-radius:50%;background:var(--primary);color:var(--on);font-size:11.5px;font-weight:500;display:grid;place-items:center;flex:none}
+.sh b{font-weight:500}.sh p{margin:2px 0 0;color:var(--fg2);font-size:12.5px}
+.body{padding-left:34px}
+.opts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;position:relative;border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:3px;min-height:96px;background:var(--bg)}
+.opt[aria-checked="true"]{border:2px solid var(--primary);padding:13px 15px}
+.opt .v{font-size:16px;font-weight:500}.opt[aria-checked="true"] .v{color:var(--primary)}
+.opt .tag{position:absolute;top:-1px;right:-1px;border-radius:0 11px 0 8px;font-size:11px;font-weight:500;padding:3px 8px;background:var(--primary);color:var(--on)}
+.opt .tag.n{background:var(--muted);color:var(--fg)}
+.opt input{margin-top:8px;width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;background:var(--bg);color:var(--fg)}
+.opt:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.sw{all:unset;cursor:pointer;width:34px;height:20px;border-radius:10px;background:var(--primary);position:relative;flex:none}
+.sw::after{content:"";position:absolute;top:2px;left:16px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}
+.sw[aria-checked="false"]{background:#bdbdc7}.sw[aria-checked="false"]::after{left:2px}
+.sw.g{background:var(--ok)}.sw.g[aria-checked="false"]{background:#bdbdc7}
+.sw:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.pillsw{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--primary);background:var(--pS);color:var(--pF);border-radius:999px;padding:5px 14px 5px 6px;font-weight:500;font-size:13px;white-space:nowrap}
+.pillsw[aria-checked="false"]{border-color:var(--line);background:var(--muted);color:var(--fg2)}
+.input{width:min(320px,100%);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font:inherit;background:var(--bg);color:var(--fg)}
+.note{border-radius:10px;padding:12px 16px;font-size:13px}
+.note.w{background:var(--warnS);color:var(--warn)}
+.note b{font-weight:500;display:block;margin-bottom:2px}
+/* table */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th{background:var(--muted);text-align:left;font-weight:500;font-size:12.5px;color:var(--fg2);padding:10px 14px}
+td{border-top:1px solid var(--line);padding:10px 14px;vertical-align:middle}
+tr.s td{background:var(--sel)}
+tr.d td{opacity:.5}
+tr.c{cursor:pointer}tr.c:hover td{background:var(--muted)}
+tr.new td{background:var(--pS)}
+.cb{width:18px;height:18px;accent-color:var(--primary)}
+.tw.scroll{max-height:404px;overflow:auto}
+.tw.scroll thead th{position:sticky;top:0;z-index:1}
+tr.off td{opacity:.6}
+.dots{border:0;background:none;color:var(--fg2);padding:6px;border-radius:6px;display:inline-grid;place-items:center}
+.dots:hover{background:var(--muted)}
+.menu{position:absolute;z-index:40;min-width:220px;background:var(--bg);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.16);padding:6px;display:flex;flex-direction:column}
+.menu button{border:0;background:none;text-align:left;padding:8px 10px;border-radius:6px;font-size:13.5px}
+.menu button:hover:not(:disabled){background:var(--muted)}
+.menu button.danger{color:var(--bad)}
+.menu button:disabled{opacity:.4;cursor:not-allowed}
+.menu hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+.menu small{padding:6px 10px 2px;color:var(--fg2);font-size:11.5px}
+.prd{display:flex;gap:12px;align-items:center}
+.th{width:44px;height:44px;border-radius:6px;background:var(--muted);border:1px solid var(--line);display:grid;place-items:center;font-size:11px;color:var(--fg2);flex:none}
+.th.s{width:36px;height:36px;border:0}
+.prd b{font-weight:500;display:block;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta{font-size:12.5px;color:var(--fg2)}.meta strong{color:var(--fg);font-weight:500;margin-right:6px}
+.ids{font-size:12px;color:var(--fg2)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:0;border-radius:999px;padding:6px 12px;background:var(--muted);font-size:12.5px;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.selbar{display:flex;gap:12px;align-items:center;padding:10px 14px;border-radius:8px;background:var(--sel);font-size:13px;margin:12px 0}
+.selbar b{font-weight:500}
+/* lista */
+.summary{font-size:15px;font-weight:500;margin:0 0 16px}
+.alert{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 16px;border-radius:8px;background:var(--warnS);color:var(--warn);margin-bottom:16px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:20px}
+.stat{border-radius:10px;padding:12px 16px;border:1px solid}
+.stat small{display:block;font-size:12.5px}.stat strong{display:block;font-size:20px;font-weight:700;margin:2px 0}.stat span{font-size:12px;opacity:.85}
+.st-g{background:var(--okS);border-color:#9fe0b4;color:#14532d}.st-i{background:var(--indS);border-color:#a9bcf5;color:#1e2b6b}.st-a{background:var(--warnS);border-color:#f2cf7a;color:#6b3a07}
+:root[data-theme="dark"] .stat,:root:not([data-theme="light"]) .stat{}
+.lh{display:flex;align-items:center;margin-bottom:10px}.lh b{font-weight:500;font-size:15px;flex:1}
+.notices{margin-bottom:16px;overflow:hidden}
+.notices .h{display:flex;align-items:center;gap:10px;padding:12px 16px}.notices .h b{font-weight:500}
+.nt{display:flex;gap:14px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
+.nt .i{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex:none}
+.nt b{font-weight:500;display:block}
+.rule{display:flex;gap:32px;align-items:center;flex-wrap:wrap;padding:16px 20px;border-radius:12px;background:var(--muted);margin-bottom:20px}
+.rule small{display:block;color:var(--fg2);font-size:12.5px}.rule strong{font-weight:500;font-size:15px}
+.mc{color:var(--ok);font-weight:500}
+.sum5{display:flex;gap:28px;padding:14px 20px;border-radius:10px;background:var(--muted);margin-bottom:16px;flex-wrap:wrap}
+.sum5 strong{display:block;font-size:18px;font-weight:500}.sum5 span{font-size:12.5px;color:var(--fg2)}
+.sel{border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:var(--bg);color:var(--fg);font:inherit;min-width:200px;display:flex;justify-content:space-between;gap:8px}
+/* modal / toast */
+.ov{position:fixed;inset:0;background:var(--ovl);display:grid;place-items:center;padding:20px;z-index:20}
+.modal{width:min(480px,100%);background:var(--bg);border-radius:16px;padding:28px 28px 24px;box-shadow:0 12px 40px rgba(0,0,0,.2);display:flex;flex-direction:column;gap:20px}
+.modal h2{margin:0;font-size:17px;font-weight:500}
+.acct{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:10px;background:var(--muted)}
+.acct .a{width:36px;height:36px;border-radius:10px;background:var(--pS);color:var(--pF);display:grid;place-items:center;font-weight:500}
+.acct small{display:block;font-size:11px;color:var(--fg2);letter-spacing:.03em}.acct b{font-weight:500}
+.modal ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px}.modal li::marker{color:var(--primary)}
+.toast{position:fixed;left:calc(50% + 124px);transform:translateX(-50%);bottom:calc(28px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);border-radius:12px;padding:14px;display:flex;gap:14px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:30;max-width:calc(100% - 32px)}
+.toast .k{width:24px;height:24px;border-radius:50%;background:#16a34a;color:#fff;display:grid;place-items:center;font-size:12px;flex:none}
+.toast b{font-weight:500;display:block}.toast small{opacity:.8}
+.toast button{border:0;background:none;color:inherit;font-weight:500}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:900px){.app{grid-template-columns:1fr}.side{display:none}main{padding:20px 16px 56px}.types,.stats{grid-template-columns:1fr}.opts{grid-template-columns:1fr 1fr}.body{padding-left:0}.toast{left:50%}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side" aria-label="Menu">
+ <div class="brand"><div class="r"><svg class="logo" viewBox="0 0 24 24"><path d="M12 2L2 22h5l5-10 5 10h5z" fill="#2a63ff"/></svg><div><small>AVANTPRO CONTROL</small><b>Dev Store</b></div></div><div class="ctx"><span>Filial SP ⇕</span><span>2 de 3 ⇕</span></div></div>
+ <div class="nh">GERAL</div>
+ <span class="ni dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9H4z"/></svg>Home</span>
+ <span class="ni dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/></svg>Produtos</span>
+ <button class="ni on" data-go="lista"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l16 8-16 8 3-8z"/></svg><span id="menu">Automações</span></button>
+ <span class="ni dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-9"/></svg>Métricas</span>
+ <div class="nh">CONFIGURAÇÕES</div>
+ <span class="ni dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21V5l8-3 8 3v16"/></svg>Empresa</span>
+ <span class="ni dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="M6 8v8a2 2 0 0 0 2 2h8"/></svg>Filiais</span>
+ <span class="ni dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/></svg>Usuários</span>
+ <span class="ni dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14l4-4M7 17a3 3 0 0 1 0-4l3-3M17 7a3 3 0 0 1 0 4l-3 3"/></svg>Integrações</span>
+ <div class="nh">CONTATO</div>
+ <span class="ni dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 17h.01M10 9a2 2 0 1 1 3 2c-1 .5-1 1-1 2"/></svg>Suporte</span>
+ <div class="nh">ADMIN</div>
+ <span class="ni dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/></svg>Administração<span class="adm">ADMIN</span></span>
+ <div class="user"><span class="av">C</span><div><b>Camino</b><small>Administrador</small></div></div>
+</aside>
+<main id="v" tabindex="-1"></main>
+</div>
+<div id="layer"></div>
+<script>
+/* Telas do "Fluxo com telas" (WIP Novo Control). Estado inicial: nenhuma campanha. */
+const R_RATE=.16, MIN_DISC=.05; // tarifa + imposto; produto "entra" se aceita pelo menos 5% de desconto
+const CAT=[
+ ['por','Porta-retrato Mdf 15x21 Branco',29.90,14.00,3.21,'MLB4411873320','PR-1521',42],
+ ['cop','Porta-copos Mdf Kit 6 Unidades',15.90,9.00,0.40,'MLB4519937701','PC-6',65],
+ ['org','Organizador de Gaveta Mdf 4 Divisórias',44.90,18.00,11.81,'MLB4502219876','ORG-GAV-4',35],
+ ['nic','Nicho Redondo Branco',59.95,20.00,13.35,'MLB5362055198','Sem SKU',2],
+ ['kit','Kit Organizador de Mesa Mdf 3 Peças Branco',58.10,25.00,13.08,'MLB4471230987','KIT-ORG-3P',3],
+ ['gal','Galeria Baby Trio Nicho Redondo Mdf',84.90,27.00,32.87,'MLB5087970952','3NRB',1],
+ ['sup','Suporte para Celular de Mesa Ajustável Preto',39.90,18.50,5.20,'MLB4588120443','SUP-CEL-P',6],
+ ['cai','Caixa Organizadora para Escritório Média Azul',72.50,30.00,9.10,'MLB4601339812','CX-ESC-M',8],
+ ['lum','Luminária de Mesa LED Touch com Base de Madeira',120.00,65.00,15.00,'MLB4612957730','LUM-LED',4],
+ ['tec','Teclado Sem Fio Bluetooth Multidispositivo',99.90,45.00,12.50,'MLB4620045518','TEC-BT',9],
+ ['age','Agenda Semanal Compacta Capa Dura Vermelha',48.90,20.00,6.00,'MLB4633120987','AG-SEM-V',37],
+ ['moc','Mochila Executiva para Notebook 15,6” Preta',185.00,95.00,22.00,'MLB4641873320','MOC-EXE',44],
+ ['can2','Kit de Canetas Coloridas 12 Unidades',25.00,10.00,3.50,'MLB4652219876','CAN-12',5],
+ ['can','Caneta Azul Bic',1.15,null,null,'MLB4040387981','Sem SKU',12]
+].map(([id,n,P,cost,mc,mlb,sku,days])=>({id,n,P,cost,mc,mlb,sku,days,C:mc===null?null:P*(1-R_RATE)-mc,camp:null}));
+const T=CAT.length;
+const st={tipo:null,draft:null,camps:[],cur:null,chip:'todos',q:'',psel:[],pmove:'',toast:null};
+const fmt=v=>'R$ '+v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+const pc=v=>(v*100).toFixed(1).replace('.',',')+'%';
+const pi=v=>Math.round(v*100)+'%';
+const has=p=>p.C!==null;
+const mcp=p=>p.mc/p.P;
+const maxD=(p,m)=>{if(!has(p))return -1;const k=1-R_RATE-m;return k<=0?-1:1-p.C/(k*p.P);};
+const enters=(p,m)=>maxD(p,m)>=MIN_DISC;
+const canEver=p=>enters(p,0);
+const prod=id=>CAT.find(p=>p.id===id);
+const camp=id=>st.camps.find(c=>c.id===id);
+const inCamp=id=>CAT.filter(p=>p.camp===id);
+/* convites abertos no Mercado Livre na hora de ligar a regra (exemplo) */
+const CONV={kit:[['Oferta relâmpago',.15],['Dia das Crianças',.35]],gal:[['Dia das Crianças',.30]],nic:[['Oferta do dia',.10]],org:[['Oferta do dia',.10],['Liquida Full',.25]],por:[['Oferta do dia',.05]],cop:[['Oferta do dia',.10]],sup:[['Oferta relâmpago',.10]],cai:[['Black Friday antecipada',.15]],lum:[['Oferta do dia',.05]],tec:[['Liquida Full',.20]],moc:[['Oferta relâmpago',.08]],can2:[['Dia das Crianças',.12]]};
+const mcAt=(p,d)=>{const P=p.P*(1-d);return (P*(1-R_RATE)-p.C)/P;};
+function evalP(p){p.promo=null;p.refused=[];const c=p.camp&&camp(p.camp);if(!c||!has(p))return;let best=null;(CONV[p.id]||[]).forEach(([n,d])=>{const m=mcAt(p,d);if(m>=c.m){if(!best||d>best.d)best={n,d,m};}else p.refused.push({n,d,m});});p.promo=best;}
+function preview(ps,m){let t=0,r=0,x=0;ps.forEach(p=>{const cv=CONV[p.id]||[];t+=cv.length;let ok=false;cv.forEach(([n,d])=>{if(has(p)&&mcAt(p,d)>=m)ok=true;else r++;});if(ok)x++;});if(!t)return 'Nenhum convite aberto agora para esses produtos: os próximos serão avaliados assim que chegarem.';return `Você tem ${t} convites abertos agora para esses produtos: ao ligar, ${x} ${x===1?'produto entra':'produtos entram'} em promoção e ${r} ${r===1?'convite é recusado':'convites são recusados'} por deixar menos de ${pi(m)} de margem.`;}
+function promoCell(p,c){if(!has(p))return '<span class="muted">—</span>';if(!c){const n=(CONV[p.id]||[]).length;return `Sem promoção<div class="muted sm">${n?n+(n===1?' convite aberto':' convites abertos')+' · não recebe promoções automáticas':'não recebe promoções automáticas'}</div>`;}
+ if(p.promo)return `<span style="color:var(--ok);font-weight:500">Em promoção: ${p.promo.n} (−${Math.round(p.promo.d*100)}%)</span><div class="muted sm">aceita ao ligar a regra · margem de ${pc(p.promo.m)} · ${fmt(p.P*(1-p.promo.d)*p.promo.m)} por venda</div>`;
+ if(p.refused&&p.refused.length){const f=p.refused[0];return `<span style="color:var(--warn)">Convite recusado: ${f.n} (−${Math.round(f.d*100)}%)</span><div class="muted sm">${f.m<0?'daria prejuízo em cada venda':'deixaria '+pc(f.m)+' de margem, abaixo de '+pi(c.m)}${p.refused.length>1?` · e mais ${p.refused.length-1}`:''}</div>`;}
+ return `Aguardando convites do Mercado Livre<div class="muted sm">${enters(p,c.m)?`pode entrar em promoções de até ${Math.floor(maxD(p,c.m)*100)}% de desconto`:'margem muito perto da regra: não aceita desconto'}</div>`;}
+function convCount(id){const ps=inCamp(id);const a=ps.filter(p=>p.promo).length;const r=ps.reduce((s,p)=>s+(p.refused?p.refused.length:0),0);return a+r?`${a} aceitos · ${r} recusados`:'<span class="muted">—</span>';}
+function recFor(list,all){const pool=list.filter(canEver);if(!pool.length)return null;const need=all?pool.length:Math.ceil(pool.length*.85);let b=0;for(let m=0;m<=40;m++){if(pool.filter(p=>enters(p,m/100)).length>=need)b=m;}return b/100;}
+const IC={bolt:'<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h7l-1 8 10-12h-7z"/></svg>',
+sl:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="8" cy="6" r="2.5" fill="var(--bg)"/><circle cx="16" cy="12" r="2.5" fill="var(--bg)"/><circle cx="10" cy="18" r="2.5" fill="var(--bg)"/></svg>',
+dots:'<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="8" cy="13" r="1.4"/></svg>'};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const H=(t,d)=>`<h1>${t}<span class="hp">?</span></h1><p class="desc">${d}</p>`;
+const media=p=>`<div class="prd"><span class="th">N/A</span><div><b>${esc(p.n)}</b><div class="meta"><strong>${fmt(p.P)}</strong>${has(p)?'custo '+fmt(p.cost):'sem custo'}</div><div class="ids">${p.mlb} ⧉ &nbsp; ${p.sku} ⧉</div></div></div>`;
+
+/* margin cards: recomendada + 2 acima + outro; nada selecionado ao entrar */
+function cards(list,unit,d,atual,total){total=total||list.length;
+ const rec=d.rec;const base=rec===null?.10:rec;const vals=[base,base+.05,base+.10].map(v=>Math.round(v*100)/100);
+ if(atual!==undefined&&!vals.some(v=>Math.abs(v-atual)<1e-9))vals[2]=atual;
+ const desc=['mantém quase todo o catálogo','mais margem, menos promoções','prioriza margem'];
+ return `<div class="opts" role="radiogroup" aria-label="Margem mínima">${vals.map((v,i)=>{const on=d.m!==null&&!d.outro&&Math.abs(d.m-v)<1e-9;const isA=atual!==undefined&&Math.abs(v-atual)<1e-9;const isR=rec!==null&&Math.abs(v-rec)<1e-9;
+  return `<button class="opt" role="radio" aria-checked="${on}" data-a="m" data-v="${v}">${isA?'<span class="tag n">Atual</span>':isR?'<span class="tag">Recomendado</span>':''}<span class="v">${pi(v)}</span><span>${list.filter(p=>enters(p,v)).length} de ${total} ${unit}</span><span class="muted sm">${desc[i]}</span></button>`;}).join('')}
+ <div class="opt" role="radio" aria-checked="${!!d.outro}" data-a="m" data-v="outro"><span class="v" style="font-size:14px">Outro valor</span><input inputmode="decimal" placeholder="Ex.: 12 %" aria-label="Outra margem em %" value="${d.outro?d.outroTxt:''}" data-a="outro"><span class="muted sm" id="outro-n">${d.outro&&d.m!==null?list.filter(p=>enters(p,d.m)).length+' de '+total+' '+unit:''}</span></div></div>`;}
+
+const V={
+'passo-1':()=>`${H('Aceite automático de promoções','O Control aceita sozinho os convites de promoção do Mercado Livre que respeitam a margem mínima da sua regra.')}
+<p style="font-weight:500;margin:0 0 12px">${st.camps.length?'Escolha o tipo de regra':'Escolha sua primeira regra'}</p>
+<div class="types" role="radiogroup" aria-label="Tipo de regra">
+<button class="type" role="radio" aria-checked="${st.tipo==='auto'}" data-a="tipo" data-v="auto"><span class="tag">Recomendado</span><span class="ic">${IC.bolt}</span><div><h3>Regra Automática</h3><p style="margin-top:6px">Vale para todos os seus produtos, O Control aceita sozinho os convites do Mercado Livre que respeitam a margem mínima e recusa o resto.</p></div></button>
+<button class="type" role="radio" aria-checked="${st.tipo==='pers'}" data-a="tipo" data-v="pers"><span class="ic">${IC.sl}</span><div><h3>Regra Personalizada</h3><p style="margin-top:6px">Vale só para os produtos que você escolher, com uma margem mínima própria. Útil para objetivos específicos, como liquidar estoque ou proteger os campeões de venda.</p></div></button></div>
+<div class="ft"><button class="btn pr" data-a="seguinte" ${st.tipo?'':'disabled'}>Seguinte</button></div>`,
+
+'automatica':()=>{const d=st.draft;const all=CAT;
+ return `${H('Nova campanha automática','Etapa 2 de 2 · Dev Store (Filial SP) · Todos os produtos entram, inclusive os novos.')}
+<div class="form"><section class="card step"><div class="sh"><span class="num">1</span><b>Margem de contribuição mínima</b></div><div class="body">${cards(all,'anúncios',d)}
+<div class="row" style="margin-top:14px"><button class="sw" role="switch" aria-checked="${d.novos}" data-a="novos" aria-label="Anúncios novos entram nesta regra"></button><span class="muted sm">Quando você publicar um anúncio novo no Mercado Livre, ele entra nesta regra com a mesma margem mínima.</span></div></div></section>
+<section class="card step"><div class="sh"><span class="num">2</span><b>Nome da campanha</b></div><div class="body"><input class="input" value="${esc(d.name)}" data-a="name" aria-label="Nome da campanha"></div></section>
+<div class="ft"><button class="btn" data-go="passo-1">Voltar</button><button class="btn pr" data-a="confirm" ${d.m===null?'disabled':''}>Ligar regra</button></div></div>`;},
+
+'personalizada':()=>{const d=st.draft;const q=(d.q||'').toLowerCase();
+ const list=CAT.filter(p=>(!q||p.n.toLowerCase().includes(q)||p.mlb.toLowerCase().includes(q)||p.sku.toLowerCase().includes(q))&&(d.chip==='sem'?!p.camp:d.chip==='parados'?p.days>=30:true));
+ const sel=d.sel.map(prod);const mv=sel.filter(p=>p.camp);const grp={};mv.forEach(p=>{const n=camp(p.camp).name;grp[n]=(grp[n]||0)+1;});
+ d.rec=recFor(sel,true);
+ const allSel=list.filter(has).length&&list.filter(has).every(p=>d.sel.includes(p.id));
+ return `${H('Nova campanha personalizada','Etapa 2 de 2 · Só entram os produtos que você escolher.')}
+<div class="form"><section class="card step"><div class="sh"><span class="num">1</span><div><b>Escolha os produtos</b><p>Os produtos escolhidos saem da regra em que estão hoje enquanto esta campanha estiver ligada.</p></div></div><div class="body">
+<div class="row" style="flex-wrap:wrap"><input class="input" placeholder="Buscar por nome, SKU ou MLB" aria-label="Buscar" value="${esc(d.q||'')}" data-a="q"><div class="chips">${[['todos',`Todos (${T})`],['sem',`Sem automação (${CAT.filter(p=>!p.camp).length})`],['parados',`Parados há 30+ dias (${CAT.filter(p=>p.days>=30).length})`]].map(([k,l])=>`<button class="chip" aria-pressed="${d.chip===k}" data-a="chip" data-v="${k}">${l}</button>`).join('')}</div></div>
+<div class="selbar"><b>${sel.length} ${sel.length===1?'produto selecionado':'produtos selecionados'}</b>${Object.entries(grp).map(([n,c])=>`<span>${c} sai de “${esc(n)}” ao salvar</span>`).join('')}</div>
+<div class="tw scroll" tabindex="0" aria-label="Lista de produtos"><table><thead><tr><th style="width:44px"><input type="checkbox" class="cb" aria-label="Selecionar todos" data-a="pall" ${allSel?'checked':''}></th><th>Produto</th><th style="width:150px">Margem hoje</th><th style="width:200px">Campanha atual</th></tr></thead><tbody>
+${list.map(p=>{const s=d.sel.includes(p.id);if(!has(p))return `<tr class="d"><td><input type="checkbox" class="cb" disabled aria-label="${esc(p.n)}"></td><td><div class="prd"><span class="th s"></span><div><b>${esc(p.n)}</b><span class="meta">${fmt(p.P)} · ${p.mlb}</span></div></div></td><td>—</td><td style="color:var(--bad)">Sem custo cadastrado</td></tr>`;
+ const c=p.camp&&camp(p.camp);return `<tr class="${s?'s':''}"><td><input type="checkbox" class="cb" ${s?'checked':''} data-a="psel" data-v="${p.id}" aria-label="Selecionar ${esc(p.n)}"></td><td><div class="prd"><span class="th s"></span><div><b>${esc(p.n)}</b><span class="meta">${fmt(p.P)} · ${p.mlb}</span></div></div></td><td>${pc(mcp(p))}<div class="muted sm">${fmt(p.mc)} por venda</div></td><td>${c?(s?`<span style="color:var(--warn)">${esc(c.name)}</span><div class="sm" style="color:var(--warn)">sai de lá ao salvar</div>`:esc(c.name)):'Sem regra'}</td></tr>`;}).join('')}
+${list.length?'':'<tr><td colspan="4" class="muted" style="text-align:center;padding:24px">Nenhum produto encontrado.</td></tr>'}
+</tbody></table></div><p class="muted sm" style="margin:10px 0 0">Mostrando ${list.length} de ${T} produtos</p></div></section>
+<section class="card step"><div class="sh"><span class="num">2</span><b>Margem de contribuição mínima</b></div><div class="body">${sel.length?cards(sel,'anúncios',d):'<p class="muted sm" style="margin:0">Escolha os produtos para ver as opções de margem.</p>'}</div></section>
+<section class="card step"><div class="sh"><span class="num">3</span><div><b>Nome da campanha</b><p>Sugerimos um nome a partir do filtro usado. Você pode trocar.</p></div></div><div class="body"><input class="input" value="${esc(d.name)}" data-a="name" aria-label="Nome da campanha"></div></section>
+<div class="ft"><button class="btn" data-go="passo-1">Voltar</button><button class="btn pr" data-a="confirm" ${(!sel.length||d.m===null)?'disabled':''}>Criar automação</button></div></div>`;},
+
+'lista':()=>{if(!st.camps.length)return V['passo-1']();
+ const cov=CAT.filter(p=>p.camp&&camp(p.camp).on).length;const noCost=CAT.filter(p=>!has(p)).length;
+ return `<div class="tabs" role="tablist"><button role="tab" aria-selected="true">Automações</button><button role="tab" aria-selected="false" data-go="produtos">Produtos</button></div>
+${H('Automações de promoções','Cada automação aceita convites do Mercado Livre só quando a margem de contribuição fica acima da regra dela.')}
+<div class="stats"><div class="stat st-g"><small>MC em promoções (7 dias)</small><strong>—</strong><span>disponível após as primeiras promoções</span></div><div class="stat st-i"><small>Em promoção agora</small><strong>${CAT.filter(p=>p.promo).length||'—'}</strong><span>${CAT.filter(p=>p.promo).length?'aceitas ao ligar as regras':'aguardando convites do Mercado Livre'}</span></div><div class="stat st-a"><small>Produtos cobertos</small><strong>${cov} de ${T}</strong><span>${noCost} sem custo cadastrado</span></div></div>
+<div class="lh"><b>Suas automações</b><button class="btn pr" data-a="nova">Nova automação</button></div>
+<div class="tw"><table><thead><tr><th style="width:70px">Status</th><th>Automação</th><th>Produtos</th><th>Convites (30 dias)</th><th>MC em promoções</th><th>Resultado</th><th style="width:40px"></th></tr></thead><tbody>
+${st.camps.map(c=>`<tr class="${c.isNew?'new':''} ${c.on?'':'off'}"><td><button class="sw g" role="switch" aria-checked="${c.on}" data-a="csw" data-v="${c.id}" aria-label="Ligar ou desligar ${esc(c.name)}"></button></td><td><span class="row" style="gap:8px"><button class="lnk" style="padding:0;font-size:14px" data-a="open" data-v="${c.id}">${esc(c.name)}</button>${c.isNew?'<span class="badge b-solid">Nova</span>':''}</span><div class="muted sm">${c.type==='auto'?'Automático':'Personalizado'} · MC mín. ${pi(c.m)}</div></td><td style="font-weight:500">${inCamp(c.id).length}</td><td>${convCount(c.id)}</td><td class="muted">—</td><td class="muted">—</td><td><button class="dots" data-a="cmenu" data-v="${c.id}" aria-haspopup="menu" aria-label="Opções de ${esc(c.name)}">${IC.dots}</button></td></tr>`).join('')}
+</tbody></table></div>`;},
+
+'campanha':()=>{const c=camp(st.cur);if(!c)return V.lista();const ps=inCamp(c.id);
+ return `<button class="crumb" data-go="lista">‹ Voltar</button>${H(esc(c.name),`${c.type==='auto'?'Automático':'Personalizado'} · aceita convites quando a margem de contribuição fica em pelo menos ${pi(c.m)}.`)}
+<div class="rule"><span class="row"><button class="sw g" role="switch" aria-checked="${c.on}" data-a="csw" data-v="${c.id}" aria-label="Ligar ou desligar"></button><strong>${esc(c.name)}</strong></span><div><small>Regra</small><strong>MC mínima de ${pi(c.m)}</strong></div>${c.type==='auto'?`<div><small>Produtos novos</small><strong>${c.novos?'entram sozinhos':'não entram'}</strong></div>`:''}<span class="grow"></span><button class="btn" data-a="editar">Editar</button></div>
+<div class="tw"><table><thead><tr><th style="width:80px">Estado</th><th>Produto</th><th style="width:210px">Margem de contribuição</th><th>Promoção agora</th><th style="width:56px"></th></tr></thead><tbody>
+${ps.map(p=>`<tr><td><button class="sw g" role="switch" aria-checked="${p.on!==false}" data-a="psw" data-v="${p.id}" aria-label="Estado do produto"></button></td><td>${media(p)}</td><td class="mc">${fmt(p.mc)} (${pc(mcp(p))})<div class="muted sm" style="font-weight:400">sem promoção</div></td><td>${promoCell(p,c)}</td><td style="text-align:right"><button class="dots" data-a="dmenu" data-v="${p.id}" aria-haspopup="menu" aria-label="Opções de ${esc(p.n)}">${IC.dots}</button></td></tr>`).join('')}
+</tbody></table></div><p class="muted sm">Mostrando ${ps.length} de ${ps.length}</p>`;},
+
+'editar':()=>{const c=camp(st.cur);if(!c)return V.lista();const d=st.draft;const list=c.type==='auto'?CAT:inCamp(c.id);
+ return `${H('Editar · '+esc(c.name),`${c.type==='auto'?'Regra automática':'Regra personalizada'} · ligada hoje · ${list.filter(p=>enters(p,c.m)).length} de ${list.length} anúncios entram hoje`)}
+<div class="form"><section class="card step"><div class="sh"><span class="num">1</span><b>Margem de contribuição mínima</b></div><div class="body">${cards(list,'anúncios',d,c.m)}</div></section>
+<section class="card step"><div class="sh"><span class="num">2</span><b>Nome da campanha</b></div><div class="body"><input class="input" value="${esc(d.name)}" data-a="name" aria-label="Nome da campanha"></div></section>
+<section class="card step"><div class="row"><div class="grow"><b style="font-weight:500">Desligar esta regra</b><p class="muted sm" style="margin:2px 0 0">Novos convites deixam de ser aceitos. As promoções já aceitas continuam até o fim, e os produtos ficam sem regra.</p></div><button class="btn dg">Desligar regra</button></div></section>
+<div class="ft"><button class="btn" data-go="campanha">Cancelar</button><button class="btn pr" data-a="salvar" ${d.m===null?'disabled':''}>Salvar alterações</button></div></div>`;},
+
+'produtos':()=>{const inC=CAT.filter(p=>p.camp).length;const semM=CAT.filter(p=>has(p)&&!canEver(p)).length;
+ const q=st.q.toLowerCase();const list=CAT.filter(p=>!q||p.n.toLowerCase().includes(q)||p.mlb.toLowerCase().includes(q));
+ return `<div class="tabs" role="tablist"><button role="tab" aria-selected="false" data-go="lista">Automações (${st.camps.length})</button><button role="tab" aria-selected="true">Produtos (${T})</button></div>
+${H('Seus produtos','Cada automação aceita convites do Mercado Livre só quando a margem de contribuição fica acima da regra dela.')}
+<div class="sum5">${[[T,'produtos'],[inC,'em alguma campanha'],[CAT.filter(p=>has(p)&&!p.camp).length,'sem campanha'],[CAT.filter(p=>!has(p)).length,'sem custo'],[semM,'sem margem para promoção']].map(([a,b])=>`<div><strong>${a}</strong><span>${b}</span></div>`).join('')}</div>
+<div class="row" style="margin-bottom:12px"><input class="input" placeholder="Buscar por nome, SKU ou MLB" aria-label="Buscar" value="${esc(st.q)}" data-a="pq"><span class="grow"></span><span class="sel">Todas as campanhas <span>⌄</span></span></div>
+${st.psel.length?`<div class="selbar"><b>${st.psel.length} ${st.psel.length===1?'selecionado':'selecionados'}</b><span>Mover para</span><select class="sel" data-a="pmove" aria-label="Mover para"><option value="">Escolha a campanha</option>${st.camps.map(c=>`<option value="${c.id}" ${st.pmove===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select><span class="grow"></span><button class="btn sm" data-a="pcancel">Cancelar</button><button class="btn pr sm" data-a="paplicar" ${st.pmove?'':'disabled'}>Aplicar</button></div>`:''}
+<div class="tw"><table><thead><tr><th style="width:44px"><span style="position:absolute;left:-9999px">Selecionar</span></th><th>Produto</th><th>Campanha</th><th>Margem de contribuição</th><th>Promoção agora</th><th style="width:130px"></th></tr></thead><tbody>
+${list.map(p=>{const c=p.camp&&camp(p.camp);let cc,mm;
+ if(!has(p)){cc='<span class="badge b-bad">Sem custo</span><div class="muted sm">não dá para calcular a margem</div>';mm='—';}
+ else if(!canEver(p)){cc=(c?esc(c.name)+'<br>':'')+'<span class="badge b-warn">Sem margem para promoção</span><div class="muted sm">MC de '+pc(mcp(p))+' mesmo sem desconto</div>';mm=`<span style="color:var(--warn);font-weight:500">${fmt(p.mc)} (${pc(mcp(p))})</span><div class="muted sm">revise preço ou custo</div>`;}
+ else if(c){cc=`${esc(c.name)}<div class="muted sm">MC mín. ${pi(c.m)}${p.on===false?' · pausado':''}</div>`;mm=`<span class="mc">${fmt(p.mc)} (${pc(mcp(p))})</span><div class="muted sm">${enters(p,c.m)?`pode entrar em promoções de até ${Math.floor(maxD(p,c.m)*100)}% de desconto`:'margem muito perto da regra: não aceita desconto'}</div>`;}
+ else{cc='Sem campanha<div class="muted sm">não recebe promoções automáticas</div>';mm=`<span class="mc">${fmt(p.mc)} (${pc(mcp(p))})</span><div class="muted sm">pode entrar em promoções</div>`;}
+ const s=st.psel.includes(p.id);
+ return `<tr class="${s?'s':''}"><td><input type="checkbox" class="cb" ${s?'checked':''} ${has(p)?'':'disabled'} data-a="pcb" data-v="${p.id}" aria-label="Selecionar ${esc(p.n)}"></td><td>${media(p)}</td><td>${cc}</td><td>${mm}</td><td>${promoCell(p,c)}</td><td style="text-align:right">${has(p)?`<button class="dots" data-a="pmenu" data-v="${p.id}" aria-haspopup="menu" aria-label="Opções de ${esc(p.n)}">${IC.dots}</button>`:'<button class="btn sm">Cadastrar custo</button>'}</td></tr>`;}).join('')}
+</tbody></table></div><p class="muted sm">Mostrando ${list.length} de ${T} produtos</p>`;}
+};
+
+/* draft */
+function newDraft(type){const list=type==='auto'?CAT:[];st.draft={type,m:null,outro:false,outroTxt:'',novos:true,name:type==='auto'?'Automação da conta':'Campeões de venda',sel:[],chip:'todos',q:'',rec:type==='auto'?recFor(CAT,false):null};}
+/* modal */
+function modal(){const d=st.draft;let title,lines;
+ if(d.type==='auto'){title='Ligar a regra automática?';lines=[`Margem mínima de ${pi(d.m)} para todos os produtos.`,`${CAT.filter(p=>enters(p,d.m)).length} de ${T} anúncios podem entrar em promoções a partir de agora.`,d.novos?'Anúncios novos entram automaticamente.':'Anúncios novos não entram nesta regra.'];const pv=preview(CAT.filter(p=>has(p)&&!p.camp),d.m);lines.splice(2,0,pv);}
+ else{const sel=d.sel.map(prod);const grp={};let auto=0;sel.forEach(p=>{if(p.camp){const c=camp(p.camp);if(c.type==='auto')auto++;else grp[c.name]=(grp[c.name]||0)+1;}});
+  title='Ligar a regra personalizada?';lines=[`${sel.length} ${sel.length===1?'produto':'produtos'} com margem mínima de ${pi(d.m)}.`];
+  const parts=Object.entries(grp).map(([n,c])=>`${c} ${c===1?'produto sai':'produtos saem'} de “${n}”`);if(auto)parts.push(`${auto} ${auto===1?'sai':'saem'} da regra automática`);
+  if(parts.length)lines.push(parts.join(' e ')+' enquanto esta regra estiver ligada.');lines.push(preview(sel,d.m));}
+ document.getElementById('layer').innerHTML=`<div class="ov" data-a="ovl"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt"><h2 id="mt">${title}</h2><div class="acct"><span class="a">D</span><div><small>VAI SER LIGADA NA CONTA</small><b>Dev Store · Filial SP</b></div></div><ul>${lines.map(l=>`<li>${esc(l)}</li>`).join('')}</ul><div class="ft" style="margin:0"><button class="btn" data-a="close">Cancelar</button><button class="btn pr" data-a="ligar">Ligar regra</button></div></div></div>`;
+ document.querySelector('.modal .btn.pr').focus();}
+const close=()=>document.getElementById('layer').innerHTML='';
+function paintToast(){let t=document.getElementById('toast');if(!st.toast){t&&t.remove();return;}if(!t){t=document.createElement('div');t.id='toast';t.className='toast';t.setAttribute('role','status');document.body.appendChild(t);}
+ t.innerHTML=`<span class="k">✓</span><div><b>${esc(st.toast.t)}</b><small>${esc(st.toast.s)}</small></div><button data-a="open" data-v="${st.toast.id}">Ver campanha</button><button data-a="tx" aria-label="Fechar">✕</button>`;}
+
+/* routing */
+const VIEWS=Object.keys(V);
+function render(){closeMenu();let v=location.hash.slice(1);if(!VIEWS.includes(v))v='passo-1';
+ if((v==='automatica'||v==='personalizada')&&(!st.draft||st.draft.type!==(v==='automatica'?'auto':'pers')||st.draft.edit))newDraft(v==='automatica'?'auto':'pers');
+ document.getElementById('menu').textContent=(v==='passo-1'||(v==='lista'&&!st.camps.length))?'Promoções':'Automações';
+ document.getElementById('v').innerHTML=V[v]();paintToast();}
+window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0);});
+const go=v=>{close();if(location.hash.slice(1)===v)render();else location.hash=v;};
+function keepFocus(key){const a=document.activeElement;const pos=a&&a.selectionStart;render();const el=document.querySelector(`[data-a="${key}"]`);if(el){el.focus();try{el.setSelectionRange(pos,pos);}catch(e){}}}
+
+document.addEventListener('click',e=>{
+ if(!e.target.closest('.menu')&&!e.target.closest('[data-a="cmenu"],[data-a="pmenu"]'))closeMenu();
+ const t=e.target.closest('[data-a],[data-go]');if(!t)return;
+ if(t.dataset.go&&!t.dataset.a){if(t.dataset.go==='lista'&&!st.camps.length){go('passo-1');return;}go(t.dataset.go);return;}
+ const a=t.dataset.a,v=t.dataset.v;
+ if(a==='ovl'&&e.target!==t)return;
+ switch(a){
+  case 'tipo':st.tipo=v;render();break;
+  case 'seguinte':if(!st.tipo)return;st.draft=null;go(st.tipo==='auto'?'automatica':'personalizada');break;
+  case 'm':if(v==='outro'){st.draft.outro=true;if(e.target.tagName!=='INPUT'){render();document.querySelector('[data-a="outro"]').focus();}}else{st.draft.m=+v;st.draft.outro=false;render();}break;
+  case 'novos':st.draft.novos=!st.draft.novos;render();break;
+  case 'chip':st.draft.chip=v;render();break;
+  case 'psel':{const s=st.draft.sel;const i=s.indexOf(v);i>=0?s.splice(i,1):s.push(v);st.draft.m=null;st.draft.outro=false;render();break;}
+  case 'pall':{const d=st.draft;const q=(d.q||'').toLowerCase();const vis=CAT.filter(p=>has(p)&&(!q||p.n.toLowerCase().includes(q))&&(d.chip==='sem'?!p.camp:d.chip==='parados'?p.days>=30:true)).map(p=>p.id);const all=vis.every(id=>d.sel.includes(id));d.sel=all?d.sel.filter(id=>!vis.includes(id)):[...new Set([...d.sel,...vis])];d.m=null;d.outro=false;render();break;}
+  case 'confirm':if(st.draft.m!==null)modal();break;
+  case 'close':case 'ovl':close();break;
+  case 'ligar':create();break;
+  case 'nova':st.tipo=null;st.draft=null;go('passo-1');break;
+  case 'open':if(e.target.closest('[data-a="csw"]'))return;st.cur=v;st.camps.forEach(c=>{if(c.id===v)c.isNew=false;});st.toast=null;go('campanha');break;
+  case 'csw':{e.stopPropagation();const c=camp(v);c.on=!c.on;render();break;}
+  case 'psw':{const p=prod(v);p.on=p.on===false;render();break;}
+  case 'editar':openEdit();break;
+  case 'cmenu':{st.menuFor=v;const c=camp(v);menu(t,[{a:'m-editar',l:'Editar'},{a:'m-pausar',l:c.on?'Pausar':'Retomar'},{sep:1},{a:'m-excluir',l:'Excluir',danger:1}]);break;}
+  case 'm-editar':closeMenu();st.cur=st.menuFor;openEdit();break;
+  case 'm-pausar':{const c=camp(st.menuFor);c.on=!c.on;render();break;}
+  case 'm-excluir':{const id=st.menuFor;st.camps=st.camps.filter(x=>x.id!==id);CAT.forEach(p=>{if(p.camp===id){p.camp=null;p.on=true;evalP(p);}});if(st.toast&&st.toast.id===id)st.toast=null;if(!st.camps.length){st.tipo=null;go('passo-1');}else render();break;}
+  case 'pmenu':{st.menuFor=v;const p=prod(v);menu(t,[{a:'p-mover',l:p.camp?'Mover para outra campanha':'Adicionar a uma campanha',dis:!st.camps.some(c=>c.id!==p.camp)}]);break;}
+  case 'dmenu':{st.menuFor=v;const p=prod(v);menu(t,[{a:'p-pausar',l:p.on===false?'Retomar':'Pausar'},{a:'p-mover',l:'Mover para outra campanha',dis:!st.camps.some(c=>c.id!==p.camp)},{sep:1},{a:'p-excluir',l:'Excluir da campanha',danger:1}]);break;}
+  case 'p-pausar':{const p=prod(st.menuFor);p.on=p.on===false;render();break;}
+  case 'p-mover':{const p=prod(st.menuFor);const m=document.querySelector('.menu');m.innerHTML='<small>'+(p.camp?'Mover para':'Adicionar a')+'</small>'+st.camps.filter(c=>c.id!==p.camp).map(c=>`<button role="menuitem" data-a="p-mover-to" data-v="${c.id}">${esc(c.name)}</button>`).join('');m.querySelector('button').focus();break;}
+  case 'p-mover-to':{const p=prod(st.menuFor);p.camp=v;p.on=true;evalP(p);render();break;}
+  case 'p-excluir':{const p=prod(st.menuFor);p.camp=null;p.on=true;evalP(p);render();break;}
+  case 'salvar':{const c=camp(st.cur);if(st.draft.m===null)return;c.m=st.draft.m;c.name=st.draft.name||c.name;inCamp(c.id).forEach(evalP);st.draft=null;go('campanha');break;}
+  case 'pcb':{const i=st.psel.indexOf(v);i>=0?st.psel.splice(i,1):st.psel.push(v);if(!st.psel.length)st.pmove='';render();break;}
+  case 'pcancel':st.psel=[];st.pmove='';render();break;
+  case 'paplicar':{if(!st.pmove)return;st.psel.forEach(id=>{prod(id).camp=st.pmove;evalP(prod(id));});st.psel=[];st.pmove='';render();break;}
+  case 'tx':st.toast=null;paintToast();break;
+ }
+});
+function openEdit(){const c=camp(st.cur);const list=c.type==='auto'?CAT:inCamp(c.id);st.draft={edit:true,type:c.type,m:null,outro:false,outroTxt:'',name:c.name,rec:recFor(list,c.type!=='auto')};go('editar');}
+function menu(btn,items){closeMenu();const r=btn.getBoundingClientRect();const m=document.createElement('div');m.className='menu';m.setAttribute('role','menu');m.innerHTML=items.map(i=>i.sep?'<hr>':`<button role="menuitem" data-a="${i.a}" ${i.dis?'disabled':''} class="${i.danger?'danger':''}">${i.l}</button>`).join('');document.body.appendChild(m);const w=m.offsetWidth;m.style.top=(r.bottom+window.scrollY+4)+'px';m.style.left=Math.max(8,r.right+window.scrollX-w)+'px';const f=m.querySelector('button:not([disabled])');f&&f.focus();}
+function closeMenu(){document.querySelectorAll('.menu').forEach(m=>m.remove());}
+document.addEventListener('change',e=>{if(e.target.dataset.a==='pmove'){st.pmove=e.target.value;render();}});
+document.addEventListener('input',e=>{const a=e.target.dataset.a;if(!a)return;
+ if(a==='name')st.draft.name=e.target.value;
+ if(a==='q'){st.draft.q=e.target.value;keepFocus('q');}
+ if(a==='pq'){st.q=e.target.value;keepFocus('pq');}
+ if(a==='outro'){const d=st.draft;d.outroTxt=e.target.value;d.outro=true;const n=parseFloat(e.target.value.replace(',','.').replace('%',''));d.m=(!isNaN(n)&&n>=0&&n<60)?n/100:null;keepFocus('outro');}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){close();closeMenu();}if((e.key==='Enter'||e.key===' ')&&e.target.matches('tr[data-a="open"]')){e.preventDefault();e.target.click();}});
+function create(){const d=st.draft;close();const id='c'+Date.now();
+ const c={id,name:d.name.trim()||(d.type==='auto'?'Automação da conta':'Campanha personalizada'),type:d.type,m:d.m,novos:d.novos,on:true,isNew:true};
+ st.camps.forEach(x=>x.isNew=false);
+ if(d.type==='auto'){st.camps.unshift(c);CAT.forEach(p=>{if(has(p)&&!p.camp)p.camp=id;});}
+ else{st.camps.push(c);d.sel.forEach(pid=>prod(pid).camp=id);}
+ inCamp(id).forEach(evalP);const n=inCamp(id).length;const np=inCamp(id).filter(p=>p.promo).length;
+ st.toast={id,t:d.type==='auto'?'Regra automática ligada':'Regra personalizada ligada',s:`Na Dev Store (Filial SP) · margem mínima de ${pi(c.m)} · ${np} ${np===1?'produto entrou':'produtos entraram'} em promoção agora`};
+ st.draft=null;st.tipo=null;go('lista');}
+if(!location.hash)location.replace('#passo-1');
+render();
+
+</script>
+</body>
+</html>
